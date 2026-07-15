@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App kiểm kê dành cho người lười như toaii</title>
+    <title>App kiểm kê dành cho người lười (Pro Max)</title>
     
     <!-- Thư viện CDN -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
@@ -13,7 +13,7 @@
 
     <style>
         :root {
-            --primary-color: #6366f1; /* Đổi màu tím nhẹ nhàng hơn */
+            --primary-color: #6366f1;
             --success-color: #10b981;
             --bg-color: #f8fafc;
             --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -31,7 +31,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 2rem auto;
             padding: 0 20px;
             flex: 1;
@@ -42,15 +42,38 @@
             margin-bottom: 30px;
         }
 
-        .header h1 { color: var(--primary-color); margin-bottom: 5px; font-weight: 800; }
-        .prefix-list {
-            font-size: 0.85rem;
-            color: #64748b;
-            background: #e2e8f0;
-            padding: 5px 15px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 10px;
+        .header h1 { color: var(--primary-color); margin-bottom: 10px; font-weight: 800; }
+
+        /* Vùng cấu hình đầu số */
+        .config-box {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .config-box label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+
+        .config-box input {
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .config-box input:focus {
+            border-color: var(--primary-color);
         }
 
         /* Vùng tải ảnh */
@@ -58,7 +81,7 @@
             background: white;
             border: 2px dashed #cbd5e1;
             border-radius: 12px;
-            padding: 40px;
+            padding: 30px;
             text-align: center;
             cursor: pointer;
             transition: 0.3s;
@@ -69,10 +92,11 @@
 
         #preview-img {
             max-width: 100%;
-            max-height: 200px;
+            max-height: 250px;
             display: none;
             margin: 15px auto;
             border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
 
         /* Tiến trình */
@@ -82,7 +106,7 @@
         }
 
         .progress-bar {
-            height: 8px;
+            height: 10px;
             background: #e2e8f0;
             border-radius: 10px;
             overflow: hidden;
@@ -92,10 +116,10 @@
             height: 100%;
             width: 0;
             background: var(--primary-color);
-            transition: width 0.2s;
+            transition: width 0.3s;
         }
 
-        /* Toolbar điều khiển */
+        /* Toolbar */
         .toolbar {
             display: none;
             background: white;
@@ -109,11 +133,10 @@
             gap: 10px;
         }
 
-        /* Grid hiển thị */
         .results-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
         }
 
         .qr-card {
@@ -125,55 +148,40 @@
             border: 1px solid #f1f5f9;
         }
 
-        .qr-card .qr-code {
-            margin: 0 auto 10px;
-            display: inline-block;
+        .qr-card canvas {
+            max-width: 100%;
+            height: auto !important;
         }
 
-        .qr-card .code-val {
+        .code-val {
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1rem;
             display: block;
-            margin-bottom: 15px;
-            color: #334155;
+            margin: 10px 0;
         }
 
-        /* Nút bấm */
         .btn {
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 8px;
             border: none;
             font-weight: 600;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
             transition: 0.2s;
         }
 
         .btn-primary { background: var(--primary-color); color: white; }
         .btn-success { background: var(--success-color); color: white; }
         .btn-outline { background: white; border: 1px solid #cbd5e1; }
+        .btn-sm { padding: 6px 10px; font-size: 0.8rem; width: 100%; }
+        
         .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-sm { padding: 6px 12px; font-size: 0.85rem; flex: 1; }
 
         footer {
             padding: 30px;
             text-align: center;
             color: #94a3b8;
             font-size: 0.9rem;
-            border-top: 1px solid #e2e8f0;
-            margin-top: 40px;
-        }
-
-        #empty-msg {
-            text-align: center;
-            padding: 50px;
-            font-size: 1.1rem;
-            color: #94a3b8;
-            grid-column: 1 / -1;
-            display: none;
         }
     </style>
 </head>
@@ -181,21 +189,24 @@
 
 <div class="container">
     <div class="header">
-        <h1>App kiểm kê dành cho người lười như toaii</h1>
-        <p>Tự động nhận diện và tạo mã QR hàng loạt (13 chữ số)</p>
-        <div class="prefix-list">
-            Đầu số hỗ trợ: 0131, 3041, 016, 484, 351, 244, 1751
-        </div>
+        <h1>App kiểm kê cho người lười 😴</h1>
+        <p>Quét ảnh -> Lọc mã 13 số theo ý muốn -> Tạo QR hàng loạt</p>
+    </div>
+
+    <!-- Cấu hình đầu số -->
+    <div class="config-box">
+        <label for="prefix-input">Nhập các đầu số bạn cần tìm (cách nhau bằng dấu phẩy):</label>
+        <input type="text" id="prefix-input" value="0131, 3041, 016, 484, 351, 244, 1751" placeholder="Ví dụ: 0131, 2024, 888">
+        <small style="color: #64748b;">Hệ thống sẽ tìm chuỗi <b>13 chữ số</b> bắt đầu bằng các số này.</small>
     </div>
 
     <!-- Upload Section -->
     <div class="upload-container" id="drop-zone">
         <div id="upload-ui">
-            <span style="font-size: 50px;">📸</span>
-            <p>Thả ảnh vào đây hoặc click để chọn ảnh cần quét</p>
-            <p style="font-size: 0.8rem; color: #94a3b8;">(Mẹo: Ảnh càng rõ nét quét càng chuẩn nha!)</p>
+            <span style="font-size: 40px;">📸</span>
+            <p>Thả ảnh vào đây hoặc click để chọn ảnh</p>
         </div>
-        <img id="preview-img" alt="Original Image">
+        <img id="preview-img" alt="Preview">
         <input type="file" id="file-input" accept="image/*" style="display: none;">
     </div>
 
@@ -209,25 +220,23 @@
 
     <!-- Actions Toolbar -->
     <div class="toolbar" id="toolbar">
-        <div>Đã tìm thấy: <strong id="count-num" style="color: var(--primary-color);">0</strong> mã hợp lệ</div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn btn-outline" onclick="copyAll()">Copy hết luôn</button>
-            <button class="btn btn-success" onclick="downloadAllZip()">Tải hết .ZIP về</button>
+        <div>Tìm thấy: <strong id="count-num" style="color: var(--primary-color);">0</strong> mã</div>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline" onclick="copyAll()">Copy tất cả</button>
+            <button class="btn btn-success" onclick="downloadAllZip()">Tải .ZIP</button>
         </div>
     </div>
 
-    <!-- Results Grid -->
-    <div id="empty-msg">Hong tìm thấy mã nào hết trơn...</div>
-    <div class="results-grid" id="results-grid"></div>
+    <!-- Results -->
+    <div id="results-grid" class="results-grid"></div>
 
-    <!-- Reset -->
     <div style="text-align: center; margin-top: 30px; display: none;" id="reset-box">
-        <button class="btn btn-outline" onclick="location.reload()">Quét tiếp tấm khác</button>
+        <button class="btn btn-outline" onclick="location.reload()">Quét tấm khác</button>
     </div>
 </div>
 
 <footer>
-    Design by 189547 Huỳnh Nhật Thanh - Làm việc thông minh chứ đừng làm việc chăm chỉ 😉
+    Làm việc thông minh hơn, không phải chăm chỉ hơn 😉
 </footer>
 
 <script>
@@ -238,16 +247,13 @@
     const progressText = document.getElementById('progress-text');
     const progressBox = document.getElementById('progress-box');
     const toolbar = document.getElementById('toolbar');
+    const prefixInput = document.getElementById('prefix-input');
     
     let codesList = [];
+    let lastRawText = ""; // Lưu lại kết quả OCR để lọc lại nếu đổi đầu số
 
     dropZone.onclick = () => fileInput.click();
-    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.style.borderColor = "#6366f1"; };
-    dropZone.ondragleave = () => { dropZone.style.borderColor = "#cbd5e1"; };
-    dropZone.ondrop = (e) => {
-        e.preventDefault();
-        if (e.dataTransfer.files[0]) handleFiles(e.dataTransfer.files[0]);
-    };
+    
     fileInput.onchange = (e) => {
         if (e.target.files[0]) handleFiles(e.target.files[0]);
     };
@@ -260,16 +266,14 @@
         progressBox.style.display = 'block';
         resultsGrid.innerHTML = '';
         toolbar.style.display = 'none';
-        document.getElementById('empty-msg').style.display = 'none';
 
         try {
-            progressText.innerText = "Đang gồng mình đọc chữ...";
             const worker = await Tesseract.createWorker({
                 logger: m => {
                     if (m.status === 'recognizing text') {
                         const p = Math.round(m.progress * 100);
                         progressFill.style.width = p + '%';
-                        progressText.innerText = `Đang soi ảnh: ${p}%`;
+                        progressText.innerText = `Đang đọc chữ: ${p}%`;
                     }
                 }
             });
@@ -279,33 +283,52 @@
             await worker.setParameters({ tessedit_char_whitelist: '0123456789' });
 
             const { data: { text } } = await worker.recognize(file);
+            lastRawText = text; // Lưu trữ text thô
             await worker.terminate();
 
-            processDetectedText(text);
+            processDetectedText();
         } catch (err) {
             console.error(err);
-            progressText.innerText = "Lỗi rồi, hu hu!";
+            progressText.innerText = "Lỗi quét ảnh rồi!";
         }
     }
 
-    function processDetectedText(rawText) {
-        const cleanText = rawText.replace(/[\s\n\r]/g, '');
+    // Hàm xử lý text dựa trên đầu số tùy chỉnh
+    function processDetectedText() {
+        const cleanText = lastRawText.replace(/[\s\n\r]/g, '');
         
-        // Logic 13 số với các đầu số yêu cầu
-        const regex = /(?:(?:0131|3041|1751)\d{9})|(?:(?:016|484|351|244)\d{10})/g;
-        
-        const matches = cleanText.match(regex) || [];
-        codesList = [...new Set(matches)];
+        // Lấy danh sách đầu số từ input
+        const prefixes = prefixInput.value.split(',')
+                            .map(s => s.trim())
+                            .filter(s => s.length > 0);
 
+        if (prefixes.length === 0) {
+            alert("Hãy nhập ít nhất một đầu số (ví dụ: 0131)");
+            return;
+        }
+
+        // Tạo Regex động: (đầu_số_1\d{còn_lại})|(đầu_số_2\d{còn_lại})...
+        // Giả định tổng chiều dài mã là 13
+        const pattern = prefixes.map(p => {
+            const remaining = 13 - p.length;
+            return `(${p}\\d{${remaining}})`;
+        }).join('|');
+
+        const regex = new RegExp(pattern, 'g');
+        const matches = cleanText.match(regex) || [];
+        
+        // Loại bỏ trùng lặp
+        codesList = [...new Set(matches)];
         renderResults();
     }
 
     function renderResults() {
         progressBox.style.display = 'none';
         document.getElementById('reset-box').style.display = 'block';
+        resultsGrid.innerHTML = '';
 
         if (codesList.length === 0) {
-            document.getElementById('empty-msg').style.display = 'block';
+            resultsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #94a3b8;">Không tìm thấy mã 13 số nào khớp với đầu số trên.</p>';
             return;
         }
 
@@ -316,11 +339,11 @@
             const card = document.createElement('div');
             card.className = 'qr-card';
             card.innerHTML = `
-                <div class="qr-code" id="qr-${index}"></div>
+                <div id="qr-${index}"></div>
                 <span class="code-val">${code}</span>
-                <div style="display:flex; gap:5px;">
-                    <button class="btn btn-outline btn-sm" onclick="copySingle('${code}')">Copy</button>
-                    <button class="btn btn-primary btn-sm" onclick="downloadSingle(${index}, '${code}')">Tải ảnh</button>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <button class="btn btn-outline btn-sm" onclick="copySingle('${code}')">Copy mã</button>
+                    <button class="btn btn-primary btn-sm" onclick="downloadSingle(${index}, '${code}')">Tải ảnh QR</button>
                 </div>
             `;
             resultsGrid.appendChild(card);
@@ -341,13 +364,13 @@
 
     window.copyAll = () => {
         navigator.clipboard.writeText(codesList.join('\n'));
-        alert("Đã copy toàn bộ " + codesList.length + " mã rùi!");
+        alert("Đã copy tất cả!");
     };
 
     window.downloadSingle = (index, code) => {
         const canvas = document.querySelector(`#qr-${index} canvas`);
         const link = document.createElement('a');
-        link.download = `QR_${code}.png`;
+        link.download = `${code}.png`;
         link.href = canvas.toDataURL();
         link.click();
     };
@@ -363,6 +386,11 @@
         });
         const content = await zip.generateAsync({type:"blob"});
         saveAs(content, "Ma_QR_Kiem_Ke.zip");
+    };
+
+    // Lắng nghe sự kiện thay đổi đầu số để lọc lại ngay lập tức (nếu đã có ảnh)
+    prefixInput.onchange = () => {
+        if (lastRawText) processDetectedText();
     };
 </script>
 
