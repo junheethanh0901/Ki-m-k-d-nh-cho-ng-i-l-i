@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>0131 Scanner - 13 Digits Only</title>
+    <title>App kiểm kê dành cho người lười như toaii</title>
     
     <!-- Thư viện CDN -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
@@ -13,7 +13,7 @@
 
     <style>
         :root {
-            --primary-color: #2563eb;
+            --primary-color: #6366f1; /* Đổi màu tím nhẹ nhàng hơn */
             --success-color: #10b981;
             --bg-color: #f8fafc;
             --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -42,7 +42,16 @@
             margin-bottom: 30px;
         }
 
-        .header h1 { color: var(--primary-color); margin-bottom: 5px; }
+        .header h1 { color: var(--primary-color); margin-bottom: 5px; font-weight: 800; }
+        .prefix-list {
+            font-size: 0.85rem;
+            color: #64748b;
+            background: #e2e8f0;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+        }
 
         /* Vùng tải ảnh */
         .upload-container {
@@ -56,7 +65,7 @@
             margin-bottom: 20px;
         }
 
-        .upload-container:hover { border-color: var(--primary-color); background: #f1f5f9; }
+        .upload-container:hover { border-color: var(--primary-color); background: #f5f3ff; }
 
         #preview-img {
             max-width: 100%;
@@ -152,7 +161,7 @@
         footer {
             padding: 30px;
             text-align: center;
-            color: #64748b;
+            color: #94a3b8;
             font-size: 0.9rem;
             border-top: 1px solid #e2e8f0;
             margin-top: 40px;
@@ -172,15 +181,19 @@
 
 <div class="container">
     <div class="header">
-        <h1>0131 Batch QR Scanner</h1>
-        <p>Tìm mã 13 số bắt đầu bằng 0131 từ hình ảnh</p>
+        <h1>App kiểm kê dành cho người lười như toaii</h1>
+        <p>Tự động nhận diện và tạo mã QR hàng loạt (13 chữ số)</p>
+        <div class="prefix-list">
+            Đầu số hỗ trợ: 0131, 3041, 016, 484, 351, 244, 1751
+        </div>
     </div>
 
     <!-- Upload Section -->
     <div class="upload-container" id="drop-zone">
         <div id="upload-ui">
-            <span style="font-size: 40px;">📂</span>
-            <p>Kéo thả ảnh hoặc click để chọn ảnh cần quét</p>
+            <span style="font-size: 50px;">📸</span>
+            <p>Thả ảnh vào đây hoặc click để chọn ảnh cần quét</p>
+            <p style="font-size: 0.8rem; color: #94a3b8;">(Mẹo: Ảnh càng rõ nét quét càng chuẩn nha!)</p>
         </div>
         <img id="preview-img" alt="Original Image">
         <input type="file" id="file-input" accept="image/*" style="display: none;">
@@ -196,25 +209,25 @@
 
     <!-- Actions Toolbar -->
     <div class="toolbar" id="toolbar">
-        <div>Tổng cộng: <strong id="count-num" style="color: var(--primary-color);">0</strong> mã (13 số)</div>
+        <div>Đã tìm thấy: <strong id="count-num" style="color: var(--primary-color);">0</strong> mã hợp lệ</div>
         <div style="display: flex; gap: 10px;">
-            <button class="btn btn-outline" onclick="copyAll()">Copy tất cả</button>
-            <button class="btn btn-success" onclick="downloadAllZip()">Tải tất cả (.ZIP)</button>
+            <button class="btn btn-outline" onclick="copyAll()">Copy hết luôn</button>
+            <button class="btn btn-success" onclick="downloadAllZip()">Tải hết .ZIP về</button>
         </div>
     </div>
 
     <!-- Results Grid -->
-    <div id="empty-msg">Không tìm thấy mã bắt đầu bằng 0131 (đủ 13 chữ số).</div>
+    <div id="empty-msg">Hong tìm thấy mã nào hết trơn...</div>
     <div class="results-grid" id="results-grid"></div>
 
     <!-- Reset -->
     <div style="text-align: center; margin-top: 30px; display: none;" id="reset-box">
-        <button class="btn btn-outline" onclick="location.reload()">Quét ảnh khác</button>
+        <button class="btn btn-outline" onclick="location.reload()">Quét tiếp tấm khác</button>
     </div>
 </div>
 
 <footer>
-    Design by 189547 Huỳnh Nhật Thanh
+    Design by 189547 Huỳnh Nhật Thanh - Làm việc thông minh chứ đừng làm việc chăm chỉ 😉
 </footer>
 
 <script>
@@ -228,9 +241,8 @@
     
     let codesList = [];
 
-    // Cấu hình kéo thả
     dropZone.onclick = () => fileInput.click();
-    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.style.borderColor = "#2563eb"; };
+    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.style.borderColor = "#6366f1"; };
     dropZone.ondragleave = () => { dropZone.style.borderColor = "#cbd5e1"; };
     dropZone.ondrop = (e) => {
         e.preventDefault();
@@ -241,7 +253,6 @@
     };
 
     async function handleFiles(file) {
-        // Reset UI
         document.getElementById('upload-ui').style.display = 'none';
         const preview = document.getElementById('preview-img');
         preview.src = URL.createObjectURL(file);
@@ -252,20 +263,19 @@
         document.getElementById('empty-msg').style.display = 'none';
 
         try {
-            progressText.innerText = "Đang khởi động Tesseract...";
+            progressText.innerText = "Đang gồng mình đọc chữ...";
             const worker = await Tesseract.createWorker({
                 logger: m => {
                     if (m.status === 'recognizing text') {
                         const p = Math.round(m.progress * 100);
                         progressFill.style.width = p + '%';
-                        progressText.innerText = `Đang phân tích ảnh: ${p}%`;
+                        progressText.innerText = `Đang soi ảnh: ${p}%`;
                     }
                 }
             });
 
             await worker.loadLanguage('eng');
             await worker.initialize('eng');
-            // Tối ưu chỉ đọc số
             await worker.setParameters({ tessedit_char_whitelist: '0123456789' });
 
             const { data: { text } } = await worker.recognize(file);
@@ -274,21 +284,17 @@
             processDetectedText(text);
         } catch (err) {
             console.error(err);
-            progressText.innerText = "Có lỗi xảy ra khi OCR!";
+            progressText.innerText = "Lỗi rồi, hu hu!";
         }
     }
 
     function processDetectedText(rawText) {
-        // 1. Xóa mọi khoảng trắng và xuống dòng để ghép các chuỗi bị đứt quãng
-        // Nhưng cần giữ lại các dấu hiệu ngăn cách nếu có, ở đây ta ưu tiên dồn chuỗi
         const cleanText = rawText.replace(/[\s\n\r]/g, '');
         
-        // 2. Regex tìm: bắt đầu 0131 và 9 chữ số tiếp theo (Tổng 13 số)
-        // Dùng Global 'g' để tìm tất cả
-        const regex = /0131\d{9}/g;
-        const matches = cleanText.match(regex) || [];
+        // Logic 13 số với các đầu số yêu cầu
+        const regex = /(?:(?:0131|3041|1751)\d{9})|(?:(?:016|484|351|244)\d{10})/g;
         
-        // 3. Loại bỏ trùng lặp
+        const matches = cleanText.match(regex) || [];
         codesList = [...new Set(matches)];
 
         renderResults();
@@ -319,7 +325,6 @@
             `;
             resultsGrid.appendChild(card);
 
-            // Tạo QR Code (13 chữ số)
             new QRCode(document.getElementById(`qr-${index}`), {
                 text: code,
                 width: 150,
@@ -329,7 +334,6 @@
         });
     }
 
-    // Tiện ích
     window.copySingle = (val) => {
         navigator.clipboard.writeText(val);
         alert("Đã copy: " + val);
@@ -337,7 +341,7 @@
 
     window.copyAll = () => {
         navigator.clipboard.writeText(codesList.join('\n'));
-        alert("Đã copy toàn bộ " + codesList.length + " mã!");
+        alert("Đã copy toàn bộ " + codesList.length + " mã rùi!");
     };
 
     window.downloadSingle = (index, code) => {
@@ -350,8 +354,6 @@
 
     window.downloadAllZip = async () => {
         const zip = new JSZip();
-        progressText.innerText = "Đang đóng gói ZIP...";
-        
         codesList.forEach((code, index) => {
             const canvas = document.querySelector(`#qr-${index} canvas`);
             if (canvas) {
@@ -359,9 +361,8 @@
                 zip.file(`${code}.png`, imgData, {base64: true});
             }
         });
-
         const content = await zip.generateAsync({type:"blob"});
-        saveAs(content, "Danh_sach_QR_0131.zip");
+        saveAs(content, "Ma_QR_Kiem_Ke.zip");
     };
 </script>
 
